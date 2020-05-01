@@ -1,56 +1,61 @@
-# **Finding Lane Lines on the Road** 
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
+# **Project 1 - Lane Lines Finder** 
 
-<img src="examples/laneLines_thirdPass.jpg" width="480" alt="Combined Image" />
+The Lane Lines Finder uses computer vision libraries to detect, extract, and visualize the lines that appear on the roads similar to how humans use vision to center their car. Using various filters, Canny Edge detection, and Hough transforms, the algorithm is applied to both images and videos to visualize the line on the roads.
 
-Overview
----
+# Reflection
 
-When we drive, we use our eyes to decide where to go.  The lines on the road that show us where the lanes are act as our constant reference for where to steer the vehicle.  Naturally, one of the first things we would like to do in developing a self-driving car is to automatically detect lane lines using an algorithm.
+## Line Detection - Pipeline
+The pipeline used to generate an overlaid image of the detected line and the road image uses the OpenCV, matplotlib, and numpy libraries. The goal is to perform line detection on video footage of a driving car to demonstrate the consistency of accurate line detection.
 
-In this project you will detect lane lines in images using Python and OpenCV.  OpenCV means "Open-Source Computer Vision", which is a package that has many useful tools for analyzing images.  
+One example image is shown below:
 
-To complete the project, two files will be submitted: a file containing project code and a file containing a brief write up explaining your solution. We have included template files to be used both for the [code](https://github.com/udacity/CarND-LaneLines-P1/blob/master/P1.ipynb) and the [writeup](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md).The code file is called P1.ipynb and the writeup template is writeup_template.md 
+<img src="test_images_output/original.jpg" width=480 height=270>
 
-To meet specifications in the project, take a look at the requirements in the [project rubric](https://review.udacity.com/#!/rubrics/322/view)
+### Step 1 - Grayscale
+The image is first converted into grayscale to detect any color.
 
+<img src="test_images_output/grayscale.jpg" width=480 height=270>
 
-Creating a Great Writeup
----
-For this project, a great writeup should provide a detailed response to the "Reflection" section of the [project rubric](https://review.udacity.com/#!/rubrics/322/view). There are three parts to the reflection:
+### Step 2 - Gaussian Blur
+Then, it a gaussian blur filter is applied to remove noise that may create false positives in the Canny Edge detection, which uses the suddne changes in pixel color to determine edges
 
-1. Describe the pipeline
+<img src="test_images_output/gaussian.jpg" width=480 height=270>
 
-2. Identify any shortcomings
+### Step 3 - Canny Edge Detection
+The Canny Edge detection algorithm in the OpenCV library is applied.
 
-3. Suggest possible improvements
+<img src="test_images_output/canny.jpg" width=480 height=270>
 
-We encourage using images in your writeup to demonstrate how your pipeline works.  
+### Step 4 - Region Mask
+A region mask is created using four vertices that specify a polygon relevant to the line-detection algorithm. This removes unnecessary environment influences.
 
-All that said, please be concise!  We're not looking for you to write a book here: just a brief description.
+<img src="test_images_output/mask.jpg" width=480 height=270>
 
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup. Here is a link to a [writeup template file](https://github.com/udacity/CarND-LaneLines-P1/blob/master/writeup_template.md). 
+### Step 5 - Hough Line Transform
+The Hough Line Transform from the OpenCV library is used to detect lines by finding continuous points that align with a line and scoring each possibility.
 
+<img src="test_images_output/hough.jpg" width=480 height=270>
 
-The Project
----
+### Step 6 - Weighted Line Averaging and Extrapolation
+The line is then combined into a extrapolated and thicker representation through the use of weighted sums.
+The weight (contribution) of each detected line from the hough transformation is the length of the line itself, this minimizes the effects of smaller segments. The left and right lines are differentiated through their slope, further filtering out the error induced by environmental edges that may have horizontal or vertical slopes.
 
-## If you have already installed the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) you should be good to go!   If not, you should install the starter kit to get started on this project. ##
+<img src="test_images_output/extrapolate.jpg" width=480 height=270>
 
-**Step 1:** Set up the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) if you haven't already.
+### Step 7 - Visual Overlay
+Finally, the images are overlaid, with a 80% opacity on the extrapolated lines to show the original image's lines and the approximation's accuracy.
 
-**Step 2:** Open the code in a Jupyter Notebook
+<img src="test_images_output/combined.jpg" width=480 height=270>
 
-You will complete the project code in a Jupyter notebook.  If you are unfamiliar with Jupyter Notebooks, check out [Udacity's free course on Anaconda and Jupyter Notebooks](https://classroom.udacity.com/courses/ud1111) to get started.
+## Potential Shortcomings
+Several shortcomings with the current methodology include:
+1. In images of limited vision (e.g. darkness or shadows), the canny edge detection may find more false positives (fake edges).
+2. If the image is blurred initially, the edges may not be detected at all.
+3. The current region mask applies well if the car is perfectly centered on the road in addition to not changing lanes, if the car is off-center, then it will need to re-adjust to find lines that may be outside of the current region.
+4. If the lines are more curved, further testing will be needed to determine the appropriate minimum line length (or a different tool will be used for curvature).
 
-Jupyter is an Ipython notebook where you can run blocks of code and see results interactively.  All the code for this project is contained in a Jupyter notebook. To start Jupyter in your browser, use terminal to navigate to your project directory and then run the following command at the terminal prompt (be sure you've activated your Python 3 carnd-term1 environment as described in the [CarND Term1 Starter Kit](https://github.com/udacity/CarND-Term1-Starter-Kit/blob/master/README.md) installation instructions!):
-
-`> jupyter notebook`
-
-A browser window will appear showing the contents of the current directory.  Click on the file called "P1.ipynb".  Another browser window will appear displaying the notebook.  Follow the instructions in the notebook to complete the project.  
-
-**Step 3:** Complete the project and submit both the Ipython notebook and the project writeup
-
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
-
+## Potential Improvements
+Several possible improvements derived from the shortcomings include:
+1. Make the detection algorithm more robust by further testing in different environments, potentially adding more filters to make it work in different environments.
+2. Detect when the lines are moving relative to the car, hence adjusting the mask appropriately (only for small movements using memory from image to image).
+3. Add statistical analysis by including a range of lines that are accepted through standard deviations of detected lines, to filter out lines that have an unusual slope.
