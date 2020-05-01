@@ -8,40 +8,44 @@ The Lane Lines Finder uses computer vision libraries to detect, extract, and vis
 The pipeline used to generate an overlaid image of the detected line and the road image uses the OpenCV, matplotlib, and numpy libraries. The goal is to perform line detection on video footage of a driving car to demonstrate the consistency of accurate line detection.
 
 One example image is shown below:
-[image1]: .\test_images_output\original.jpg
+
+<img src="test_images_output/original.jpg" width=480 height=270>
 
 ### Step 1 - Grayscale
 The image is first converted into grayscale to detect any color.
-[image2]: .\test_images_output\grayscale.jpg
+
+<img src="test_images_output/grayscale.jpg" width=480 height=270>
 
 ### Step 2 - Gaussian Blur
 Then, it a gaussian blur filter is applied to remove noise that may create false positives in the Canny Edge detection, which uses the suddne changes in pixel color to determine edges
-[image3]: .\test_images_output\gaussian.jpg
+
+<img src="test_images_output/gaussian.jpg" width=480 height=270>
 
 ### Step 3 - Canny Edge Detection
 The Canny Edge detection algorithm in the OpenCV library is applied.
-[image4]: .\test_images_output\canny.jpg
+
+<img src="test_images_output/canny.jpg" width=480 height=270>
 
 ### Step 4 - Region Mask
 A region mask is created using four vertices that specify a polygon relevant to the line-detection algorithm. This removes unnecessary environment influences.
-[image5]: .\test_images_output\mask.jpg
+
+<img src="test_images_output/mask.jpg" width=480 height=270>
 
 ### Step 5 - Hough Line Transform
 The Hough Line Transform from the OpenCV library is used to detect lines by finding continuous points that align with a line and scoring each possibility.
-[image5]: .\test_images_output\hough.jpg
+
+<img src="test_images_output/hough.jpg" width=480 height=270>
 
 ### Step 6 - Weighted Line Averaging and Extrapolation
 The line is then combined into a extrapolated and thicker representation through the use of weighted sums.
 The weight (contribution) of each detected line from the hough transformation is the length of the line itself, this minimizes the effects of smaller segments. The left and right lines are differentiated through their slope, further filtering out the error induced by environmental edges that may have horizontal or vertical slopes.
-[image5]: .\test_images_output\extrapolate.jpg
+
+<img src="test_images_output/extrapolate.jpg" width=480 height=270>
 
 ### Step 7 - Visual Overlay
 Finally, the images are overlaid, with a 80% opacity on the extrapolated lines to show the original image's lines and the approximation's accuracy.
-[image5]: .\test_images_output\combined.jpg
 
-
-![alt text][image1]
-
+<img src="test_images_output/combined.jpg" width=480 height=270>
 
 ## Potential Shortcomings
 Several shortcomings with the current methodology include:
